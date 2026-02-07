@@ -10,8 +10,8 @@
       <p style="margin:0; font-family: Arial, Helvetica, sans-serif; color: rgba(0,0,0,.75);">
         Projects data not found.
         <br><br>
-        Check that your file is named <b>projects.js</b> (plural) and is located at:
-        <br><b>assets/js/projects.js</b>
+        Check that your file is named <b>projects-data.js</b> and is located at:
+        <br><b>assets/js/projects-data.js</b>
       </p>
     `;
     return;
@@ -29,7 +29,7 @@
       <p style="margin:0; font-family: Arial, Helvetica, sans-serif; color: rgba(0,0,0,.75);">
         No map projects yet.
         <br><br>
-        Add <b>category: "maps"</b> to map projects in <b>assets/js/projects.js</b>,
+        Add <b>category: "maps"</b> to map projects in <b>assets/js/projects-data.js</b>,
         or set their <b>page</b> to a maps/project URL.
       </p>
     `;
