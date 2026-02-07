@@ -3,7 +3,6 @@
   const container = document.getElementById("map-window");
   if (!container) return;
 
-  // Inject the window chrome + map div
   container.innerHTML = `
     <section class="window map-window" aria-label="Portfolio Highlights">
       <div class="titlebar">
@@ -14,17 +13,18 @@
     </section>
   `;
 
-  // If Leaflet didn't load, show a readable error in the window
   if (typeof L === "undefined") {
-    const mapEl = document.getElementById("map");
-    if (mapEl) {
-      mapEl.style.position = "static";
-      mapEl.style.padding = "18px";
-      mapEl.style.fontFamily = "Arial, Helvetica, sans-serif";
-      mapEl.innerHTML = "Leaflet failed to load (L is undefined). Check the Leaflet <script> tag and network requests.";
-    }
-    return;
-  }
+const DefaultIcon = L.icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
 
   const map = L.map("map", {
     attributionControl: false,
@@ -38,10 +38,8 @@
     { maxZoom: 19 }
   ).addTo(map);
 
-  // Always show something
   map.setView([20, 0], 2);
 
-  // Coords readout (if present on page)
   const coordsEl = document.getElementById("coords");
   const defaultText = "Move over the map…";
   let isLocked = false;
@@ -66,7 +64,6 @@
     setCoords(defaultText);
   });
 
-  // Add markers ONLY if data exists
   const projects = Array.isArray(window.PROJECTS) ? window.PROJECTS : [];
   const bounds = [];
 
