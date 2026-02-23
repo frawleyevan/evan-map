@@ -34,7 +34,7 @@
   <style>
     .page { padding-top: 18px; }
 
-    .header { margin-bottom: 28px; }
+    .header { margin-bottom: 18px; }
 
     .sidecard{
       background: transparent;
@@ -63,7 +63,7 @@
     }
 
     .coords-block{
-      margin-top: 26px;
+      margin-top: 20px;
       font-size: 13px;
       font-family: var(--type-body);
     }
@@ -72,6 +72,12 @@
       font-weight: 800;
     }
 
+
+
+    .map-panel{
+      display:flex;
+      flex-direction:column;
+    }
     /* Layout tweak specific to homepage */
     .grid{
       grid-template-columns: 1fr 320px;
@@ -79,8 +85,36 @@
 
     /* Make map slightly taller on home */
     .map-window{
-      min-height: 560px;
+      min-height: 590px;
       border-width: 3px;
+    }
+
+    .note{
+      margin-top: 18px;
+      font-size: 12px;
+      color: rgba(0,0,0,.7);
+      line-height: 1.4;
+    }
+
+
+    .contact-links{
+      margin-top: 12px;
+      font-size: 13px;
+      font-family: var(--type-body);
+      display:flex;
+      gap: 14px;
+      flex-wrap:wrap;
+    }
+
+    .contact-links a{
+      color:#0b2a3d;
+      font-weight:700;
+      text-decoration:none;
+      border-bottom:1px solid rgba(11,42,61,.4);
+    }
+
+    .contact-links a:hover{
+      border-bottom-color:#0b2a3d;
     }
   </style>
 </head>
@@ -95,24 +129,30 @@
       <div class="brand">Evan Frawley</div>
 
       <nav class="nav" aria-label="Primary navigation">
-        <a class="active" href="index.html">Home</a>
-        <a href="image.html">Image</a>
-        <a href="sound.html">Sound</a>
-        <a href="writing.html">Writing</a>
-        <a href="maps.html">Maps</a>
+        <a class="active" href="index.html">Map</a>
+        <a href="maps.html">Portfolio</a>
+        <a href="#about">About</a>
       </nav>
     </header>
+
 
     <!-- ===============================
          Main layout
          =============================== -->
     <div class="grid">
 
-      <!-- Map container (map.js injects UI + Leaflet here) -->
-      <div id="map-window"></div>
+      <div class="map-panel">
+        <!-- Map container (map.js injects UI + Leaflet here) -->
+        <div id="map-window"></div>
+
+        <div class="contact-links" aria-label="Contact links">
+          <a href="mailto:evanfrawley9@gmail.com">Email</a>
+          <a href="https://www.linkedin.com/in/evan-frawley" target="_blank" rel="noreferrer noopener">LinkedIn</a>
+        </div>
+      </div>
 
       <!-- Bio sidebar -->
-      <aside class="sidecard">
+      <aside class="sidecard" id="about">
         <img
           class="bio-pic"
           src="https://frawleyevan9.wordpress.com/wp-content/uploads/2026/01/0005932600351.jpg"
@@ -130,6 +170,10 @@
         <div class="coords-block">
           <span class="coords-label">Coordinates:</span><br />
           <span id="coords">Hover a pin…</span>
+        </div>
+
+        <div class="note">
+          Click any marker for a preview card and quick link to the full project page.
         </div>
       </aside>
 

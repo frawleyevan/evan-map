@@ -1,4 +1,3 @@
-// assets/js/map.js
 (function () {
   const container = document.getElementById("map-window");
   if (!container) return;
@@ -7,48 +6,74 @@
     <section class="window map-window" aria-label="Portfolio Highlights">
       <div class="titlebar">
         <span class="dot"></span>
-        Portfolio Highlights
+        <span class="window-title">Portfolio Highlights</span>
+        <div class="titlebar-buttons" aria-hidden="true">
+          <span></span><span></span><span class="close"></span>
+        </div>
+      </div>
+      <div class="mode-tabs" role="tablist" aria-label="Map style selector">
+        <button class="mode-tab" data-layer="map" type="button">Map</button>
+        <button class="mode-tab active" data-layer="satellite" type="button">Satellite</button>
+        <button class="mode-tab" data-layer="hybrid" type="button">Hybrid</button>
       </div>
       <div id="map"></div>
     </section>
   `;
 
-  if (typeof L === "undefined") {
-    return;
-  }
-
-  const DefaultIcon = L.icon({
-  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
-  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
-  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
-  });
-  L.Marker.prototype.options.icon = DefaultIcon;
-
+  if (typeof L === "undefined") return;
 
   const map = L.map("map", {
-    attributionControl: false,
+    attributionControl: true,
     scrollWheelZoom: false,
     zoomControl: true
   });
 
-  // Tiles
-  L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    { maxZoom: 19 }
-  ).addTo(map);
+  const mapLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap contributors"
+  });
 
-  map.setView([20, 0], 2);
+  const satelliteLayer = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 19, attribution: "Tiles &copy; Esri" }
+  );
+
+  const hybridLabels = L.tileLayer(
+    "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 19, attribution: "Labels &copy; Esri" }
+  );
+
+  const layers = {
+    map: mapLayer,
+    satellite: satelliteLayer,
+    hybrid: L.layerGroup([satelliteLayer, hybridLabels])
+  };
+
+  layers.satellite.addTo(map);
+
+  function setLayer(name) {
+    Object.values(layers).forEach((layer) => {
+      if (map.hasLayer(layer)) map.removeLayer(layer);
+    });
+    layers[name].addTo(map);
+
+    document.querySelectorAll(".mode-tab").forEach((tab) => {
+      tab.classList.toggle("active", tab.dataset.layer === name);
+    });
+  }
+
+  document.querySelectorAll(".mode-tab").forEach((tab) => {
+    tab.addEventListener("click", () => setLayer(tab.dataset.layer));
+  });
+
+  map.setView([45, -20], 3);
 
   const coordsEl = document.getElementById("coords");
   const defaultText = "Move over the map…";
   let isLocked = false;
   let lockedText = defaultText;
 
-  function setCoords(text){
+  function setCoords(text) {
     if (coordsEl) coordsEl.textContent = text;
   }
 
@@ -70,44 +95,43 @@
   const projects = Array.isArray(window.PROJECTS) ? window.PROJECTS : [];
   const bounds = [];
 
-  projects.forEach((p) => {
-    if (!Number.isFinite(p.lat) || !Number.isFinite(p.lng)) return;
+  projects.forEach((project) => {
+    if (!Number.isFinite(project.lat) || !Number.isFinite(project.lng)) return;
 
-    bounds.push([p.lat, p.lng]);
+    bounds.push([project.lat, project.lng]);
 
     const popupHTML = `
-      <div style="width:320px;font-family:Arial,Helvetica,sans-serif;">
-        <img src="${p.image || ""}" alt="${p.title || "Project image"}"
-             style="width:100%;height:170px;object-fit:cover;border-radius:10px;display:block;background:#eee;">
-        <div style="font-size:12px;font-weight:900;line-height:1.2;margin:10px 0 8px 0;">
-          ${p.title || "Untitled Project"}
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
-          <span style="font-size:11px;font-weight:700;color:rgba(0,0,0,.75);">
-            ${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}
-          </span>
-          ${p.page ? `<a href="${p.page}" style="text-decoration:none;padding:5px 10px;border:1px solid rgba(0,0,0,.25);background:linear-gradient(#fff,#e2e2e2);color:#111;border-radius:3px;font-size:11px;font-weight:800;">Open</a>` : ``}
-        </div>
-      </div>
+      <article class="project-popup">
+        <header class="project-popup-header">
+          <span>${project.id ? project.id.toUpperCase() : "PROJECT"}</span>
+          ${project.page ? `<a href="${project.page}">Open</a>` : ""}
+        </header>
+        <img src="${project.image || ""}" alt="${project.title || "Project image"}">
+        <h3>${project.title || "Untitled Project"}</h3>
+        <p>${project.lat.toFixed(6)}, ${project.lng.toFixed(6)}</p>
+      </article>
     `;
 
-    const marker = L.marker([p.lat, p.lng]).addTo(map).bindPopup(popupHTML, { maxWidth: 360 });
+    const marker = L.marker([project.lat, project.lng]).addTo(map).bindPopup(popupHTML, {
+      maxWidth: 340,
+      className: "oldmaps-popup"
+    });
 
     marker.on("mouseover", () => {
       if (isLocked) return;
-      setCoords(`${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`);
+      setCoords(`${project.lat.toFixed(6)}, ${project.lng.toFixed(6)}`);
     });
 
     marker.on("click", (e) => {
       if (e && e.originalEvent) L.DomEvent.stopPropagation(e);
       isLocked = true;
-      lockedText = `${p.lat.toFixed(6)}, ${p.lng.toFixed(6)}`;
+      lockedText = `${project.lat.toFixed(6)}, ${project.lng.toFixed(6)}`;
       setCoords(lockedText);
     });
   });
 
   if (bounds.length) {
-    map.fitBounds(bounds, { padding: [40, 40] });
+    map.fitBounds(bounds, { padding: [48, 48] });
   }
 
   setTimeout(() => map.invalidateSize(), 250);
